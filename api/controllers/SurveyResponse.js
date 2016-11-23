@@ -25,6 +25,33 @@ module.exports = function (server) {
     },
     {
       method: 'GET',
+      path: '/api/survey_reach',
+      handler: (request, reply) => {
+        SurveyResponse.fetchAll()
+        .then(survey_responses => {
+
+          const responses = survey_responses.toJSON()
+          const count = responses.length
+          const responsesWithNeighborhood = responses.filter(response => {
+            return response.neighborhood
+          }).length
+          const responsesWithContactInfo = responses.filter(response => {
+            return response.userEmail || response.userPhone
+          }).length
+
+          reply({
+            responses: count,
+            responsesWithNeighborhood,
+            responsesWithNeighborhoodPercentage: responsesWithNeighborhood / count * 100,
+            responsesWithContactInfo,
+            responsesWithContactInfoPercentage: responsesWithContactInfo / count
+          })
+
+        })
+      }
+    },
+    {
+      method: 'GET',
       path: '/api/survey_response/{id}',
       handler: (request, reply) => {
         SurveyResponse
@@ -46,6 +73,7 @@ module.exports = function (server) {
             geography_id: request.payload.geographyId,
             user_email: request.payload.userEmail,
             user_phone: request.payload.userPhone,
+            neighborhood: request.payload.neighborhood
           })
           .then(function (newSurveyResponse) {
             reply(newSurveyResponse)
@@ -66,7 +94,8 @@ module.exports = function (server) {
               survey_id: request.payload.surveyId,
               geography_id: request.payload.geographyId,
               user_email: request.payload.userEmail,
-              user_phone: request.payload.userPhone
+              user_phone: request.payload.userPhone,
+              neighborhood: request.payload.neighborhood
             })
               .then(function (surveyResponse) {
                 reply(surveyResponse)

@@ -1,6 +1,7 @@
 import React, {Component, PropTypes} from 'react'
 import { connect } from 'react-redux'
 import { browserHistory } from 'react-router'
+import ReactGA  from 'react-ga'
 
 import SurveyQuestionPager from './../ecosystems/SurveyQuestionPager.jsx'
 import LoadingIndicator from './../atoms/LoadingIndicator.jsx'
@@ -70,6 +71,10 @@ class SurveyPage extends Component {
     this.props.dispatch(
       submitSurveyAnswers(this.props.survey.responses)
     )
+    ReactGA.event({
+      category: 'Survey',
+      action: 'Clicked Finish Survey'
+    })
   }
 
   render() {

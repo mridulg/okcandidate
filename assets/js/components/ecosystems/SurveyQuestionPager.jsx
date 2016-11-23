@@ -1,9 +1,12 @@
 import React, { Component, PropTypes } from 'react'
+import ReactGA  from 'react-ga'
+import bowser from 'bowser'
 
 import { browserHistory } from 'react-router'
 
 import {
-  Button
+  Button,
+  Alert
 } from 'react-bootstrap'
 
 import Card from './../atoms/Card.jsx'
@@ -40,6 +43,12 @@ class SurveyQuestionPager extends Component {
     }
   }
 
+  componentDidMount() {
+    if (bowser.ios) {
+      window.scrollTo(0, 0)
+    }
+  }
+
   goBack() {
     if (this.props.index > 0) {
       this.decrementIndex()
@@ -63,6 +72,10 @@ class SurveyQuestionPager extends Component {
     // if the current question is not the last question
     if (!isLastQuestion.call(this)) {
       this.incrementIndex()
+      ReactGA.event({
+        category: 'Survey',
+        action: 'Answered question'
+      })
     }
 
     else if (!userHasAnsweredEnoughQuestions.call(this)) {
@@ -76,6 +89,10 @@ class SurveyQuestionPager extends Component {
 
     else if (userHasAnsweredEnoughQuestions.call(this)) {
       this.props.onSubmit()
+      ReactGA.event({
+        category: 'Survey',
+        action: 'Finished'
+      })
     }
 
   }
@@ -83,13 +100,22 @@ class SurveyQuestionPager extends Component {
   skipQuestion() {
     const questionId = this.props.questions[this.props.index].id
     this.props.dispatch(removeSurveyQuestionResponseAndIntensity(questionId))
+    this.setState({
+      alerts: {}
+    })
     this.nextQuestionOrSubmit()
+    ReactGA.event({
+      category: 'Survey',
+      action: 'Skipped A Question'
+    })
   }
 
   goForward() {
     try {
       this.validateSelections()
-      this.state.alerts = {}
+      this.setState({
+        alerts: {}
+      })
       this.nextQuestionOrSubmit()
     }
     catch (errors) {
@@ -137,6 +163,15 @@ class SurveyQuestionPager extends Component {
           onSubmit={this.props.onSubmit} />
 
         <Card>
+
+          {
+            this.props.answered === 0 &&
+            <Alert bsStyle="info">
+              You don't need to answer every question.  Skipping a question or two
+              won't prevent you from finding your OKCandidate.
+            </Alert>
+          }
+
           <SurveyQuestion
             style={{marginBottom: '2em'}}
             question={currentQuestion}

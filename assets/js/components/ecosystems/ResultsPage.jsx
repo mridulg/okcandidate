@@ -2,6 +2,7 @@ import React, { Component, PropTypes } from 'react'
 import _ from 'lodash'
 import { connect } from 'react-redux'
 import { browserHistory } from 'react-router'
+const ReactGA = require('react-ga')
 
 import {
   fetchSurveyCandidateMatches
@@ -22,11 +23,15 @@ class ResultsPage extends Component {
 
   constructor(props) {
     super(props)
+  }
 
-    this.props.dispatch(fetchSurveyCandidateMatches(
-      this.props.params.id
-    ))
+  componentDidMount () {
+    this.props.dispatch(fetchSurveyCandidateMatches(this.props.params.id))
 
+    ReactGA.event({
+      category: 'Survey',
+      action: 'Viewed Results'
+    })
   }
 
   sortRaces(races) {
@@ -62,11 +67,14 @@ class ResultsPage extends Component {
                   dispatch={this.props.dispatch} />
               }
 
-              <SurveyCompletionIndicator
-                questionsAnswered={this.props.survey.responses.length}
-                totalQuestions={this.props.survey.questions.length}
-                resultsPage
-                onSubmit={this.backToSurvey.bind(this)} />
+              {
+                (this.props.survey.responses.length && this.props.survey.questions.length) !== 0 &&
+                <SurveyCompletionIndicator
+                  questionsAnswered={this.props.survey.responses.length}
+                  totalQuestions={this.props.survey.questions.length}
+                  resultsPage
+                  onSubmit={this.backToSurvey.bind(this)} />
+              }
 
               <h1>Matches</h1>
               {
@@ -75,7 +83,7 @@ class ResultsPage extends Component {
                   this.sortRaces(races).map((race, index) => {
                     return (
                       <section key={index}>
-                        <h2>{race.candidateTypeName}</h2>
+                        <h2 style={{fontSize: 18}}>{race.candidateTypeName}</h2>
                         {
                           this.sortCandidates(race.candidates)
                             .map((candidate, index) => {
@@ -83,6 +91,7 @@ class ResultsPage extends Component {
                                 <CandidateMatchCandidate
                                   key={index}
                                   candidateName={candidate.candidateName}
+                                  candidateWebsite={candidate.candidateWebsite}
                                   compositeMatchScore={candidate.compositeMatchScore}
                                   categoryMatchScores={candidate.categoryMatchScores} />
                               )

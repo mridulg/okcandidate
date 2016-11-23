@@ -4,13 +4,46 @@ const React = require('react');
 
 const Default = React.createClass({
 
-  render: function() {
+  _titlecase: function(str){
+    return str.replace(/\w\S*/g, function(txt){return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();});
+  },
+  getInitialState: function() {
+    const defaultUrl = "http://okcandidate.code4hr.org";
+    const image = this.props.candidate ? `http://okcandidate.code4hr.org/img/candidates/virginiabeach/${this.props.candidate}.jpg` : 'http://okcandidate.code4hr.org/img/ballot-box.png';
+    const url = this.props.id ? `http://code4hr.org/results/${id}` : defaultUrl;
+    const description = this.props.candidate ? `I got matched with ${this._titlecase(this.props.candidate)}. Who will you match with?`: "Find out which candidates for local office are a match for you!";
+    const siteName = "OkCandidate"
+    return {
+        tags: [
+        {name: "description", content: description},
+        {itemProp: "name", content: siteName},
+        {itemProp: "description", content: description},
+        {itemProp: "image", content: image},
+        {name: "twitter:card", content: siteName},
+        {name: "twitter:site", content: url},
+        {name: "twitter:title", content: siteName},
+        {name: "twitter:description", content: description},
+        {name: "twitter:creator", content: "@code4hr"},
+        {name: "twitter:image", content: image},
+        {property: "og:title", content: siteName},
+        {property: "og:type", content: "website"},
+        {property: "og:url", content: url},
+        {property: "og:image", content: image},
+        {property: "og:description", content: description},
+        {property: "og:site_name", content: siteName}
+    ]}
+  },
 
+  render: function() {
     return(
       <html>
         <head>
           <meta charSet="utf-8"></meta>
-          <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"></meta>
+          {
+            this.state.tags.map((tag, index) =>
+              <meta data-doc-meta="true" key={index} {...tag} />)
+          }
+          <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1, maximum-scale=1, user-scalable=no"></meta>
           <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css" rel="stylesheet"></link>
           <title>OK Candidate</title>
           <link rel="apple-touch-icon" sizes="180x180" href="/icons/apple-touch-icon.png"></link>
